@@ -1,62 +1,160 @@
-#include <iostream>
-#include <conio.h>
-using namespace std;
-
-class TollBooth {
-private:
-    unsigned int carsPassed;
-    int totalMoney;
-
-public:
-    TollBooth();
-    void payingCar();
-    void nopayCar();
-    void display();
-};
-
-TollBooth::TollBooth() : carsPassed(0), totalMoney(0) {}
-
-void TollBooth::payingCar() {
-    carsPassed++;
-    totalMoney += 50.0;
+#include <iostream> 
+#include <conio.h> 
+#include <string> 
+using namespace std; 
+ 
+class TollBooth 
+{ 
+private: 
+    unsigned int carsPassed; 
+    double totalMoney; 
+    string location;          // Use string instead of char* 
+    static int boothCount;    // Static member 
+public: 
+    TollBooth();                         // Default constructor 
+    TollBooth(const string& loc);        // Parameterized constructor 
+    TollBooth(const TollBooth& obj);     // Copy constructor 
+    void payingCar(); 
+    void nopayCar(); 
+    int getcarsPassed() const; 
+    double gettotalMoney() const; 
+    string getLocation() const;          // Getter for location 
+    TollBooth operator+(const TollBooth& other) const; 
+    // Friend functions 
+ friend int auditBooth(const TollBooth& b); // Friend function to access private members 
+ friend double totalReport(TollBooth* booth, int n);// Friend function to calculate total cash from all booths 
+    static int showBoothCount(int n);   // Static function 
+    ~TollBooth(); 
+}; 
+ 
+// Static variable definition 
+int TollBooth::boothCount = 0; 
+// Default constructor
+TollBooth::TollBooth() {
+    carsPassed = 0;
+    totalMoney = 0;
+    location = "Unknown";
 }
 
-void TollBooth::nopayCar() {
-    carsPassed++;
+// Parameterized constructor
+TollBooth::TollBooth(const string& loc) {
+    carsPassed = 0;
+    totalMoney = 0;
+    location = loc;
 }
 
-void TollBooth::display() {
-    cout << "Total Cars Passed: " << carsPassed << endl;
-    cout << "Total Money Collected: Rs " << totalMoney << endl;
+// Copy constructor
+TollBooth::TollBooth(const TollBooth& obj)
+    : carsPassed(obj.carsPassed),
+    totalMoney(obj.totalMoney),
+    location(obj.location) {
 }
 
-int main() {
-    TollBooth booth;
-    char key;
+// Getter functions 
+int TollBooth::getcarsPassed() const  { 
+    return carsPassed;  
+} 
+double TollBooth::gettotalMoney() const {  
+    return totalMoney; 
+} 
+string TollBooth::getLocation() const {  
+    return location;  
+} 
+// Record cars 
+void TollBooth::payingCar() {  
+    carsPassed++; 
+    totalMoney += 50;  
+} 
+void TollBooth::nopayCar() { 
+    carsPassed++; 
+} 
+// Operator + to merge stats 
+TollBooth TollBooth::operator+(const TollBooth& other) const 
+{ 
+    TollBooth result; 
+    result.carsPassed = this->carsPassed + other.carsPassed; 
+    result.totalMoney = this->totalMoney + other.totalMoney; 
+    return result; 
+} 
+ 
+// Static function 
+int TollBooth::showBoothCount(int n) { 
+ boothCount = n; // Set booth count based on user input 
+    return boothCount;  
+} 
+ 
+// Destructor 
+TollBooth::~TollBooth() 
+{ // Destructor (not needed in this case, but included for completeness) 
+} 
+ 
+// Friend functions 
+int auditBooth(const TollBooth& b) { return b.carsPassed; } 
+double totalReport(TollBooth* booth, int n) 
+{ 
+    double totalMoney = 0; 
+    for (int i = 0; i < n; i++) totalMoney += booth[i].totalMoney; 
+    return totalMoney; 
+} 
+ 
+int main()
+{
+    int n;
+    cout << "Enter number of TollBooths: ";
+    cin >> n;
+    cin.ignore();  // Clear newline from input buffer
 
-    cout << "Press 'A' for paying car\n'D' for non-paying car\n'Esc' to exit: ";
-
-    while (true)
+    // Create booths with location names
+    TollBooth* booth = new TollBooth[n];
+    for (int i = 0; i < n; i++)
     {
-        key = _getch();
-
-        if (key == 27) {
-            booth.display();
-            cout << "exiting: ";
-            break;
-        }
-        else if (key == 'a' || key == 'A') {
-            booth.payingCar();
-            cout << "A pressed: Car passed money collected.";
-        }
-        else if (key == 'd' || key == 'D') {
-            booth.nopayCar();
-            cout << "D pressed: Car passed no money collected.";
-        }
-        else {
-            cout << "Invalid key. Please press 'A', 'D', or Esc.\n";
-        }
+        string loc;
+        cout << "Enter location name for Booth " << i + 1 << ": ";
+        getline(cin, loc);
+        booth[i] = TollBooth(loc);   // Used parameterized constructor
     }
 
-    return 0;
+    char c;
+    int location;
+
+    // Traffic simulation loop
+    while (true)
+    {
+        cout << "\nEnter TollBooth number (1-" << n << "): ";
+        cin >> location;
+        if (location < 1 || location > n) {                   // CHECK CONDITION
+            cout << "Invalid booth number. Try again.";
+            continue;
+        }
+        cout << "\nPress a for Paying car";
+        cout << "\nPress d for Non-paying car";
+        cout << "\nPress ESC to Exit\n";
+        c = _getch();
+
+        if (c == 'a' || c == 'A') { booth[location - 1].payingCar(); 
+        cout << "\nPaying car counted."; }
+        else if (c == 'd' || c == 'D') { booth[location - 1].nopayCar(); 
+        cout << "\nNon-paying car counted."; }
+        else if (c == 27) break;  // ESC
+    }
+
+    cout << "\n\n===== Money Collected and Cars Passed =====\n";
+    TollBooth total = booth[0];// Start with first booth data
+    for (int i = 0; i < n; i++)// Display each booth's report
+    {
+        cout << "\nTollBooth: " << booth[i].getLocation();
+        cout << "\nTotal Cars Passed: " << booth[i].getcarsPassed();
+        cout << "\nTotal Money Collected: Rs " << booth[i].gettotalMoney() << " Rs\n";
+        if (i > 0) total = total + booth[i];
+    }
+
+    // Friend functions
+    for (int i = 0; i < n; i++)// Audit each booth
+    {
+        cout << "\nAudit Cars in " << booth[i].getLocation() << ": " << auditBooth(booth[i]);
+    }
+    cout << "\nTotal Cash (using private data members in Friend Function): " << totalReport(booth, n);
+    // Static function to show booth count
+    cout << "\nTotal TollBooth Objects Created: " << TollBooth::showBoothCount(n);
+    delete[] booth; //Free dynamic memory
 }
