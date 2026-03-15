@@ -33,7 +33,7 @@ int TollBooth::boothCount = 0;
 TollBooth::TollBooth() {
     carsPassed = 0;
     totalMoney = 0;
-    location = "Unknown";
+    location = "xyz";
 }
 
 // Parameterized constructor
@@ -117,7 +117,7 @@ int main()
     char c;
     int location;
 
-    // Traffic simulation loop
+    // infinite loop
     while (true)
     {
         cout << "\nEnter TollBooth number (1-" << n << "): ";
@@ -126,6 +126,7 @@ int main()
             cout << "Invalid booth number. Try again.";
             continue;
         }
+        cout << "For TollBooth : " << booth[location - 1].getLocation() << "\n";
         cout << "\nPress a for Paying car";
         cout << "\nPress d for Non-paying car";
         cout << "\nPress ESC to Exit\n";
@@ -144,8 +145,9 @@ int main()
     {
         cout << "\nTollBooth: " << booth[i].getLocation();
         cout << "\nTotal Cars Passed: " << booth[i].getcarsPassed();
-        cout << "\nTotal Money Collected: Rs " << booth[i].gettotalMoney() << " Rs\n";
-        if (i > 0) total = total + booth[i];
+        cout << "\nTotal Money Collected: Rs " << booth[i].gettotalMoney() << " \n";
+        if (i > 0) 
+            total = total + booth[i];
     }
 
     // Friend functions
